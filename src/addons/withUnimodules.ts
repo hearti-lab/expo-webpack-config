@@ -1,6 +1,6 @@
-import { getPossibleProjectRoot } from '@expo/config/paths';
-import path from 'path';
-import { ExternalsFunctionElement } from 'webpack';
+import { getPossibleProjectRoot } from "@expo/config/paths";
+import path from "path";
+import { ExternalsFunctionElement } from "webpack";
 
 import {
   getAliases,
@@ -10,15 +10,20 @@ import {
   getPaths,
   getPublicPaths,
   validateEnvironment,
-} from '../env';
-import { createBabelLoader, createFontLoader } from '../loaders';
+} from "../env";
+import { createBabelLoader, createFontLoader } from "../loaders";
 // importing from "../plugins" will cause dependency issues with next-adapter
 // other plugins import webpack4 packages which error on load when next-adapter uses webpack5
-import ExpoDefinePlugin from '../plugins/ExpoDefinePlugin';
-import { AnyConfiguration, Arguments, Environment, InputEnvironment } from '../types';
-import { rulesMatchAnyFiles } from '../utils';
-import withAlias from './withAlias';
-import withEntry from './withEntry';
+import ExpoDefinePlugin from "../plugins/ExpoDefinePlugin";
+import {
+  AnyConfiguration,
+  Arguments,
+  Environment,
+  InputEnvironment,
+} from "../types";
+import { rulesMatchAnyFiles } from "../utils";
+import withAlias from "./withAlias";
+import withEntry from "./withEntry";
 
 /**
  * Wrap your existing webpack config with support for Unimodules.
@@ -35,7 +40,8 @@ export default function withUnimodules(
   argv: Arguments = {}
 ): AnyConfiguration {
   // @ts-ignore: We should attempt to use the project root that the other config is already using (used for Gatsby support).
-  env.projectRoot = env.projectRoot || webpackConfig.context || getPossibleProjectRoot();
+  env.projectRoot =
+    env.projectRoot || webpackConfig.context || getPossibleProjectRoot();
 
   // Add native react aliases
   webpackConfig = withAlias(webpackConfig, getAliases(env.projectRoot));
@@ -58,9 +64,9 @@ export default function withUnimodules(
   let { supportsFontLoading } = argv;
 
   // If the args don't specify this then we'll check if the input already supports font loading.
-  if (typeof supportsFontLoading === 'undefined') {
-    const supportedFonts = ['ttf', 'otf', 'woff', 'woff2', 'eot'];
-    const testFontFileNames = supportedFonts.map(ext =>
+  if (typeof supportsFontLoading === "undefined") {
+    const supportedFonts = ["ttf", "otf", "woff", "woff2", "eot"];
+    const testFontFileNames = supportedFonts.map((ext) =>
       path.resolve(environment.projectRoot, `cool-font.${ext}`)
     );
     if (rulesMatchAnyFiles(webpackConfig, testFontFileNames)) {
@@ -68,12 +74,13 @@ export default function withUnimodules(
     }
   }
 
-  const { platform = 'web' } = env;
+  const { platform = "web" } = env;
 
   const config = argv.expoConfig || getConfig(environment);
 
   const mode = getMode(env);
-  const locations = env.locations || getPaths(environment.projectRoot, environment);
+  const locations =
+    env.locations || getPaths(environment.projectRoot, environment);
 
   const { build: buildConfig = {} } = config.web || {};
   const { babel: babelAppConfig = {} } = buildConfig;
@@ -98,7 +105,9 @@ export default function withUnimodules(
       const publicPath = webpackConfig.output.publicPath;
       return {
         publicPath,
-        publicUrl: publicPath.endsWith('/') ? publicPath.slice(0, -1) : publicPath,
+        publicUrl: publicPath.endsWith("/")
+          ? publicPath.slice(0, -1)
+          : publicPath,
       };
     }
     return getPublicPaths(environment);
@@ -130,13 +139,14 @@ export default function withUnimodules(
     // TODO: Bacon: Auto remove this loader
     {
       test: /\.html$/,
-      use: ['html-loader'],
+      use: ["html-loader"],
       exclude: locations.template.folder,
     },
     // Process application code with Babel.
     babelLoader,
 
-    supportsFontLoading && createFontLoader(locations.root, locations.includeModule),
+    supportsFontLoading &&
+      createFontLoader(locations.root, locations.includeModule, publicPath),
   ].filter(Boolean);
 
   webpackConfig.module = {
@@ -148,7 +158,7 @@ export default function withUnimodules(
     ...webpackConfig.resolve,
     symlinks: false,
     // Support platform extensions like .web.js
-    extensions: getModuleFileExtensions('web'),
+    extensions: getModuleFileExtensions("web"),
   };
 
   // Transpile and remove expo modules from Next.js externals.
@@ -157,7 +167,7 @@ export default function withUnimodules(
 
   // Add a loose requirement on the ResizeObserver polyfill if it's installed...
   webpackConfig = withEntry(webpackConfig, env, {
-    entryPath: 'resize-observer-polyfill/dist/ResizeObserver.global',
+    entryPath: "resize-observer-polyfill/dist/ResizeObserver.global",
   });
 
   return webpackConfig;
@@ -186,20 +196,22 @@ export function ignoreExternalModules(
   if (!Array.isArray(webpackConfig.externals)) {
     webpackConfig.externals = [webpackConfig.externals];
   }
-  webpackConfig.externals = webpackConfig.externals.map(external => {
-    if (typeof external !== 'function') {
+  webpackConfig.externals = webpackConfig.externals.map((external) => {
+    if (typeof external !== "function") {
       return external;
     }
 
     if (isWebpack5) {
-      return (ctx => {
-        const relPath = path.join('node_modules', ctx.request);
-        return shouldIncludeModule(relPath) ? undefined : (external as (content: any) => any)(ctx);
+      return ((ctx) => {
+        const relPath = path.join("node_modules", ctx.request);
+        return shouldIncludeModule(relPath)
+          ? undefined
+          : (external as (content: any) => any)(ctx);
       }) as ExternalsFunctionElement;
     }
 
     return ((ctx, req, cb) => {
-      const relPath = path.join('node_modules', req);
+      const relPath = path.join("node_modules", req);
       return shouldIncludeModule(relPath) ? cb() : external(ctx, req, cb);
     }) as ExternalsFunctionElement;
   });
