@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "@babel/core": "7.9.0",
+    "@expo/bunyan": "^4.0.0",
     "@expo/config": "6.0.18",
     "babel-loader": "8.1.0",
     "chalk": "^4.0.0",
@@ -87,7 +88,8 @@
     "@types/webpack-dev-server": "3.11.0",
     "@types/webpack-manifest-plugin": "~2.1.0",
     "jest-puppeteer": "^4.4.0",
-    "serve": "^11.1.0"
+    "serve": "^11.1.0",
+    "typescript": "^4.2.4"
   },
   "browserslist": {
     "production": [

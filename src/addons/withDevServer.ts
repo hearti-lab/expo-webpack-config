@@ -1,22 +1,22 @@
-import chalk from 'chalk';
-import crypto from 'crypto';
-import fs from 'fs-extra';
-import { boolish } from 'getenv';
-import * as path from 'path';
-import errorOverlayMiddleware from 'react-dev-utils/errorOverlayMiddleware';
+import chalk from "chalk";
+import crypto from "crypto";
+import fs from "fs-extra";
+import { boolish } from "getenv";
+import * as path from "path";
+import errorOverlayMiddleware from "react-dev-utils/errorOverlayMiddleware";
 // @ts-ignore
-import evalSourceMapMiddleware from 'react-dev-utils/evalSourceMapMiddleware';
-import ignoredFiles from 'react-dev-utils/ignoredFiles';
-import noopServiceWorkerMiddleware from 'react-dev-utils/noopServiceWorkerMiddleware';
-import redirectServedPath from 'react-dev-utils/redirectServedPathMiddleware';
+import evalSourceMapMiddleware from "react-dev-utils/evalSourceMapMiddleware";
+import ignoredFiles from "react-dev-utils/ignoredFiles";
+import noopServiceWorkerMiddleware from "react-dev-utils/noopServiceWorkerMiddleware";
+import redirectServedPath from "react-dev-utils/redirectServedPathMiddleware";
 import {
   ProxyConfigArray,
   ProxyConfigMap,
   Configuration as WebpackDevServerConfiguration,
-} from 'webpack-dev-server';
+} from "webpack-dev-server";
 
-import { getPaths, getPublicPaths } from '../env';
-import { AnyConfiguration, DevConfiguration, Environment } from '../types';
+import { getPaths, getPublicPaths } from "../env";
+import { AnyConfiguration, DevConfiguration, Environment } from "../types";
 
 // Ensure the certificate and key provided are valid and if not
 // throw an easy to debug error
@@ -24,7 +24,7 @@ function validateKeyAndCerts({ cert, key, keyFile, crtFile }: any): boolean {
   let encrypted;
   try {
     // publicEncrypt will throw an error with an invalid cert
-    encrypted = crypto.publicEncrypt(cert, Buffer.from('test'));
+    encrypted = crypto.publicEncrypt(cert, Buffer.from("test"));
   } catch (err) {
     return false;
   }
@@ -42,9 +42,9 @@ function validateKeyAndCerts({ cert, key, keyFile, crtFile }: any): boolean {
 function readEnvFile(file: string, type: string): any {
   if (!fs.existsSync(file)) {
     throw new Error(
-      `You specified ${chalk.cyan(type)} in your env, but the file "${chalk.yellow(
-        file
-      )}" can't be found.`
+      `You specified ${chalk.cyan(
+        type
+      )} in your env, but the file "${chalk.yellow(file)}" can't be found.`
     );
   }
   return fs.readFileSync(file);
@@ -59,8 +59,8 @@ function getHttpsConfig(projectRoot: string, isHttps: boolean): any {
     const crtFile = path.resolve(projectRoot, SSL_CRT_FILE);
     const keyFile = path.resolve(projectRoot, SSL_KEY_FILE);
     const config = {
-      cert: readEnvFile(crtFile, 'SSL_CRT_FILE'),
-      key: readEnvFile(keyFile, 'SSL_KEY_FILE'),
+      cert: readEnvFile(crtFile, "SSL_CRT_FILE"),
+      key: readEnvFile(keyFile, "SSL_KEY_FILE"),
     };
 
     if (validateKeyAndCerts({ ...config, keyFile, crtFile })) {
@@ -78,7 +78,7 @@ function getHttpsConfig(projectRoot: string, isHttps: boolean): any {
 }
 
 // @ts-ignore
-const host = process.env.HOST || '0.0.0.0';
+const host = process.env.HOST || "0.0.0.0";
 const sockHost = process.env.WDS_SOCKET_HOST;
 const sockPath = process.env.WDS_SOCKET_PATH; // default: '/sockjs-node'
 const sockPort = process.env.WDS_SOCKET_PORT;
@@ -88,11 +88,16 @@ const sockPort = process.env.WDS_SOCKET_PORT;
  * @param input
  * @internal
  */
-export function isDevConfig(input: AnyConfiguration): input is DevConfiguration {
-  return input && input.mode === 'development';
+export function isDevConfig(
+  input: AnyConfiguration
+): input is DevConfiguration {
+  return input && input.mode === "development";
 }
 
-type SelectiveEnv = Pick<Environment, 'mode' | 'locations' | 'projectRoot' | 'https' | 'platform'>;
+type SelectiveEnv = Pick<
+  Environment,
+  "mode" | "locations" | "projectRoot" | "https" | "platform"
+>;
 
 type DevServerOptions = {
   allowedHost?: string;
@@ -131,13 +136,13 @@ export function createDevServer(
 ): WebpackDevServerConfiguration {
   const { https = false } = env;
   const locations = env.locations || getPaths(env.projectRoot, env);
-  const isNative = ['ios', 'android'].includes(env.platform);
+  const isNative = ["ios", "android"].includes(env.platform);
   const { publicPath: publicUrlOrPath } = getPublicPaths(env);
   // Because native React runtimes uses .bundle we must make
   // the .bundle extension be served as javascript.
   const mimeTypes: any = isNative
     ? {
-        typeMap: { 'application/javascript': ['bundle'] },
+        typeMap: { "application/javascript": ["bundle"] },
         force: true,
       }
     : undefined;
@@ -161,12 +166,13 @@ export function createDevServer(
     // So we will disable the host check normally, but enable it if you have
     // specified the `proxy` setting. Finally, we let you override it if you
     // really know what you're doing with a special environment variable.
-    disableHostCheck: !proxy || boolish('DANGEROUSLY_DISABLE_HOST_CHECK', false),
+    disableHostCheck:
+      !proxy || boolish("DANGEROUSLY_DISABLE_HOST_CHECK", false),
     // Enable gzip compression of generated files.
     compress: true,
     // Silence WebpackDevServer's own logs since they're generally not useful.
     // It will still show compile warnings and errors with this setting.
-    clientLogLevel: 'silent',
+    clientLogLevel: "silent",
     // By default WebpackDevServer serves physical files from current directory
     // in addition to all the virtual build products that it serves from memory.
     // This is confusing because those files won’t automatically be available in
@@ -193,7 +199,7 @@ export function createDevServer(
     hot: true,
     // Use 'ws' instead of 'sockjs-node' on server since we're using native
     // websockets in `webpackHotDevClient`.
-    transportMode: 'ws',
+    transportMode: "ws",
     // Prevent a WS client from getting injected as we're already including
     // `webpackHotDevClient`.
     injectClient: false,
@@ -207,10 +213,10 @@ export function createDevServer(
     // we specified in the webpack config. When homepage is '.', default to serving
     // from the root.
     // remove last slash so user can land on `/test` instead of `/test/`
-    publicPath: '/',
+    publicPath: "/",
     // Hide `ℹ ｢wds｣: Project is running at`
     noInfo: true,
-    stats: 'none',
+    stats: "none",
     // Reportedly, this avoids CPU overload on some systems.
     // https://github.com/facebook/create-react-app/issues/293
     // src/node_modules is not ignored to support absolute imports
@@ -230,7 +236,7 @@ export function createDevServer(
     public: allowedHost,
     // `proxy` is run between `before` and `after` `webpack-dev-server` hooks
     proxy,
-    before(app, server) {
+    before(app, server: any) {
       // Everything we add here is for web support
       if (isNative) {
         return;
