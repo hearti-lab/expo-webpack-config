@@ -11,7 +11,6 @@
   },
   "scripts": {
     "watch": "tsc --watch --preserveWatchOutput",
-    "build": "tsc",
     "lint": "eslint .",
     "clean": "rimraf ./webpack/ ./tsconfig.tsbuildinfo",
     "test": "jest --config jest/unit-test-config.js",
